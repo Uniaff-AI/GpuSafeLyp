@@ -1,0 +1,74 @@
+{
+  "1": {
+    "inputs": {
+      "audio": "audio.wav",
+      "audioUI": ""
+    },
+    "class_type": "LoadAudio",
+    "_meta": {
+      "title": "Load Audio"
+    }
+  },
+  "2": {
+    "inputs": {
+      "video": "video.mp4",
+      "force_rate": 25.0,
+      "custom_width": 0,
+      "custom_height": 512,
+      "frame_load_cap": 0,
+      "skip_first_frames": 0,
+      "select_every_nth": 1,
+      "format": "AnimateDiff"
+    },
+    "class_type": "VHS_LoadVideo",
+    "_meta": {
+      "title": "Load Video"
+    }
+  },
+  "3": {
+    "inputs": {
+      "mode": "match_audio",
+      "fps": 25.0,
+      "silent_padding_sec": 0.0,
+      "images": ["2", 0],
+      "audio": ["1", 0]
+    },
+    "class_type": "VideoLengthAdjuster",
+    "_meta": {
+      "title": "Video Length Adjuster (FIXED)"
+    }
+  },
+  "4": {
+    "inputs": {
+      "seed": 42,
+      "lips_expression": 1.2,
+      "inference_steps": 6,
+      "images": ["3", 0],
+      "audio": ["3", 1]
+    },
+    "class_type": "LatentSyncNode",
+    "_meta": {
+      "title": "LatentSync1.6 Node (OPTIMIZED)"
+    }
+  },
+  "5": {
+    "inputs": {
+      "frame_rate": 25.0,
+      "loop_count": 0,
+      "filename_prefix": "latentsync_fixed",
+      "format": "video/h264-mp4",
+      "pix_fmt": "yuv420p",
+      "crf": 19,
+      "save_metadata": true,
+      "trim_to_audio": true,
+      "pingpong": false,
+      "save_output": true,
+      "images": ["4", 0],
+      "audio": ["4", 1]
+    },
+    "class_type": "VHS_VideoCombine",
+    "_meta": {
+      "title": "Video Combine (FINAL)"
+    }
+  }
+}

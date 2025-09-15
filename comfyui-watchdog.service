@@ -1,0 +1,26 @@
+[Unit]
+Description=ComfyUI Watchdog Service - Auto-restart ComfyUI instances
+After=network.target network-online.target
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=epycmax
+Group=epycmax
+WorkingDirectory=/home/epycmax
+ExecStart=/home/epycmax/comfy_watchdog.sh
+Restart=always
+RestartSec=10
+StandardOutput=journal
+StandardError=journal
+KillMode=mixed
+KillSignal=SIGTERM
+TimeoutStopSec=30
+
+# Переменные окружения
+Environment=PATH=/home/epycmax/miniconda3/bin:/home/epycmax/miniconda3/envs/latentsync/bin:/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+Environment=HOME=/home/epycmax
+Environment=CONDA_DEFAULT_ENV=latentsync
+
+[Install]
+WantedBy=multi-user.target

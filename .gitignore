@@ -1,0 +1,37 @@
+
+# Production deployment specific ignores
+*.log
+logs/
+comfy_logs/
+__pycache__/
+*.pyc
+*.pyo
+*.pid
+
+# Model files (too large for git)
+models/
+checkpoints/
+*.ckpt
+*.safetensors
+*.pt
+*.pth
+
+# Input/Output directories
+input/
+output/
+temp/
+
+# Environment and config
+.env
+*.env
+conda_env_backup/
+
+# IDE files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS files
+.DS_Store
+Thumbs.db

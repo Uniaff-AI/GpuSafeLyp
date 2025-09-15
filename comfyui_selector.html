@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ComfyUI Dual GPU Selector</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #1a1a1a;
+            color: #fff;
+        }
+        .gpu-card {
+            background: #2a2a2a;
+            border: 1px solid #444;
+            border-radius: 8px;
+            padding: 20px;
+            margin: 15px 0;
+            transition: all 0.3s ease;
+        }
+        .gpu-card:hover {
+            border-color: #666;
+            transform: translateY(-2px);
+        }
+        .gpu-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .gpu-name {
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .status {
+            padding: 4px 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            font-weight: bold;
+        }
+        .status.free { background: #22c55e; color: white; }
+        .status.busy { background: #ef4444; color: white; }
+        .status.loading { background: #f59e0b; color: white; }
+        .open-btn {
+            display: inline-block;
+            background: #3b82f6;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin-top: 10px;
+            transition: background 0.3s;
+        }
+        .open-btn:hover {
+            background: #2563eb;
+        }
+        .queue-info {
+            font-size: 14px;
+            color: #888;
+        }
+        .refresh-btn {
+            background: #6b7280;
+            color: white;
+            border: none;
+            padding: 8px 16px;
+            border-radius: 4px;
+            cursor: pointer;
+            margin-bottom: 20px;
+        }
+        .refresh-btn:hover {
+            background: #4b5563;
+        }
+        .auto-redirect {
+            background: #10b981;
+            color: white;
+            text-align: center;
+            padding: 15px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+        }
+    </style>
+</head>
+<body>
+    <h1>🚀 ComfyUI Dual GPU Interface</h1>
+    <button class="refresh-btn" onclick="refreshStatus()">🔄 Обновить статус</button>
+    
+    <div id="auto-redirect" class="auto-redirect" style="display:none;">
+        <div>🎯 Автоматически перенаправляем на свободный GPU...</div>
+        <div id="countdown"></div>
+    </div>
+
+    <div id="gpu-list">
+        <div class="gpu-card">
+            <div class="gpu-header">
+                <div class="gpu-name">🎮 GPU 0 - RTX 3090</div>
+                <div class="status loading" id="status-0">Загрузка...</div>
+            </div>
+            <div class="queue-info" id="queue-0">Проверка очереди...</div>
+            <a href="http://89.208.11.177:8188" target="_blank" class="open-btn">Открыть ComfyUI на GPU 0</a>
+        </div>
+
+        <div class="gpu-card">
+            <div class="gpu-header">
+                <div class="gpu-name">🎮 GPU 1 - RTX 3090</div>
+                <div class="status loading" id="status-1">Загрузка...</div>
+            </div>
+            <div class="queue-info" id="queue-1">Проверка очереди...</div>
+            <a href="http://89.208.11.177:8189" target="_blank" class="open-btn">Открыть ComfyUI на GPU 1</a>
+        </div>
+    </div>
+
+    <div style="margin-top: 30px; padding-top: 20px; border-top: 1px solid #444; color: #888;">
+        <h3>💡 Советы по использованию:</h3>
+        <ul>
+            <li>Выберите GPU с наименьшей нагрузкой</li>
+            <li>Зеленый статус = GPU свободен</li>
+            <li>Красный статус = GPU занят</li>
+            <li>Можете открыть оба интерфейса в разных вкладках</li>
+        </ul>
+    </div>
+
+    <script>
+        const GPU_PORTS = [8188, 8189];
+        
+        async function checkGPUStatus(port, gpuIndex) {
+            try {
+                const response = await fetch(`http://89.208.11.177:${port}/queue`);
+                const data = await response.json();
+                
+                const running = data.queue_running?.length || 0;
+                const pending = data.queue_pending?.length || 0;
+                const total = running + pending;
+                
+                const statusEl = document.getElementById(`status-${gpuIndex}`);
+                const queueEl = document.getElementById(`queue-${gpuIndex}`);
+                
+                if (total === 0) {
+                    statusEl.textContent = '🟢 Свободен';
+                    statusEl.className = 'status free';
+                } else {
+                    statusEl.textContent = `🔴 Занят (${total})`;
+                    statusEl.className = 'status busy';
+                }
+                
+                queueEl.textContent = `В работе: ${running} | В очереди: ${pending}`;
+                
+                return { running, pending, total, port };
+            } catch (error) {
+                const statusEl = document.getElementById(`status-${gpuIndex}`);
+                statusEl.textContent = '❌ Недоступен';
+                statusEl.className = 'status busy';
+                return { running: 999, pending: 999, total: 999, port };
+            }
+        }
+        
+        async function refreshStatus() {
+            const statuses = await Promise.all(
+                GPU_PORTS.map((port, index) => checkGPUStatus(port, index))
+            );
+            
+            // Найти наименее загруженный GPU
+            const bestGPU = statuses.reduce((best, current) => 
+                current.total < best.total ? current : best
+            );
+            
+            console.log('GPU статусы:', statuses);
+            console.log('Лучший GPU:', bestGPU);
+        }
+        
+        async function autoRedirect() {
+            const statuses = await Promise.all(
+                GPU_PORTS.map((port, index) => checkGPUStatus(port, index))
+            );
+            
+            const bestGPU = statuses.reduce((best, current) => 
+                current.total < best.total ? current : best
+            );
+            
+            if (bestGPU.total === 0) {
+                const redirectDiv = document.getElementById('auto-redirect');
+                const countdown = document.getElementById('countdown');
+                redirectDiv.style.display = 'block';
+                
+                let seconds = 3;
+                const timer = setInterval(() => {
+                    countdown.textContent = `Переход через ${seconds} сек на GPU ${bestGPU.port === 8188 ? '0' : '1'}...`;
+                    seconds--;
+                    
+                    if (seconds < 0) {
+                        clearInterval(timer);
+                        window.open(`http://89.208.11.177:${bestGPU.port}`, '_blank');
+                        redirectDiv.style.display = 'none';
+                    }
+                }, 1000);
+            }
+        }
+        
+        // Запуск при загрузке страницы
+        refreshStatus();
+        
+        // Автообновление каждые 5 секунд
+        setInterval(refreshStatus, 5000);
+        
+        // Проверка URL параметров для автоперенаправления
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.get('auto') === 'true') {
+            setTimeout(autoRedirect, 1000);
+        }
+    </script>
+</body>
+</html>
