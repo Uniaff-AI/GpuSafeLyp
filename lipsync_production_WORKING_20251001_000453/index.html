@@ -1,0 +1,686 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>UnionLyp</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 30px;
+            height: calc(100vh - 40px);
+        }
+        
+        .panel {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 20px;
+            padding: 30px;
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            overflow-y: auto;
+        }
+        
+        h1 {
+            text-align: center;
+            font-size: 2.5rem;
+            margin-bottom: 20px;
+            background: linear-gradient(45deg, #fff, #f0f0f0);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        
+        h3 {
+            color: #fff;
+            margin-bottom: 15px;
+            font-size: 1.2rem;
+        }
+        
+        .upload-section {
+            margin-bottom: 30px;
+        }
+        
+        .upload-area {
+            border: 2px dashed #fff;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 20px;
+            min-height: 120px;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .upload-area:hover {
+            border-color: #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+        
+        .upload-area input[type="file"] {
+            display: none;
+        }
+        
+        .upload-text {
+            font-size: 1.1rem;
+            margin-bottom: 10px;
+        }
+        
+        .upload-icon {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .file-info {
+            margin-top: 10px;
+            padding: 10px;
+            background: rgba(0, 0, 0, 0.3);
+            border-radius: 10px;
+            font-size: 0.9rem;
+        }
+        
+        .controls {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+        
+        .control-group {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+        
+        .btn {
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            color: white;
+            padding: 15px 30px;
+            border: none;
+            border-radius: 25px;
+            cursor: pointer;
+            font-size: 1.1rem;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            margin-bottom: 10px;
+        }
+        
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0, 0, 0, 0.3);
+        }
+        
+        .btn:disabled {
+            background: rgba(255, 255, 255, 0.3);
+            cursor: not-allowed;
+        }
+        
+        .status-bar {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0, 0, 0, 0.3);
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 0.9rem;
+        }
+        
+        .status-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #4CAF50;
+        }
+        
+        .status-dot.offline {
+            background: #f44336;
+        }
+        
+        /* SERVER GRID - 4 per row */
+        .servers-section {
+            margin-bottom: 30px;
+        }
+        
+        .server-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .server-card {
+            background: rgba(255, 255, 255, 0.15);
+            border-radius: 10px;
+            padding: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            transition: all 0.3s ease;
+            font-size: 0.8rem;
+        }
+        
+        .server-card.online {
+            border-left: 4px solid #4CAF50;
+            background: rgba(76, 175, 80, 0.1);
+        }
+        
+        .server-card.offline {
+            border-left: 4px solid #f44336;
+            background: rgba(244, 67, 54, 0.1);
+        }
+        
+        .server-card.busy {
+            border-left: 4px solid #FF9800;
+            background: rgba(255, 152, 0, 0.1);
+        }
+        
+        .server-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+        
+        .server-name {
+            font-weight: bold;
+            font-size: 0.85rem;
+        }
+        
+        .server-status {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            font-size: 0.7rem;
+        }
+        
+        .server-stats {
+            font-size: 0.75rem;
+            opacity: 0.9;
+        }
+        
+        .server-stats div {
+            margin-bottom: 2px;
+        }
+        
+        .server-progress {
+            width: 100%;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 2px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+        
+        .server-progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            transition: width 0.3s ease;
+        }
+        
+        .server-progress-fill.busy {
+            background: linear-gradient(45deg, #FF9800, #F57C00);
+        }
+        
+        /* TASKS */
+        .task-card {
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            margin-bottom: 15px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+        
+        .task-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        
+        .task-status {
+            padding: 5px 12px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .task-status.started, .task-status.queued {
+            background: #2196F3;
+        }
+        
+        .task-status.processing {
+            background: #FF9800;
+        }
+        
+        .task-status.completed {
+            background: #4CAF50;
+        }
+        
+        .task-status.failed {
+            background: #f44336;
+        }
+        
+        .progress-bar {
+            width: 100%;
+            height: 12px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 6px;
+            margin: 15px 0;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(45deg, #4CAF50, #45a049);
+            border-radius: 6px;
+            transition: width 0.5s ease;
+        }
+        
+        .progress-fill.animated {
+            background: linear-gradient(45deg, #4CAF50, #45a049, #4CAF50);
+            background-size: 200% 100%;
+            animation: progressShine 2s linear infinite;
+        }
+        
+        @keyframes progressShine {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+        
+        .estimated-time {
+            font-size: 0.8rem;
+            color: #90CAF9;
+            margin-top: 5px;
+        }
+        
+        input[type="number"], input[type="range"] {
+            padding: 10px;
+            border: none;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1rem;
+        }
+        
+        label {
+            font-weight: bold;
+            font-size: 0.9rem;
+        }
+        
+        @media (max-width: 1200px) {
+            .server-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
+            }
+            
+            .server-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="panel">
+            <h1>🎬 UnionLyp</h1>
+            
+            <div class="status-bar">
+                <div style="display: flex; align-items: center; gap: 8px;">
+                    <span class="status-dot" id="api-dot"></span>
+                    <span>API: <span id="api-status">Connecting...</span></span>
+                </div>
+                <div>📊 Servers: <span id="server-count">0/8</span></div>
+                <div>📋 Tasks: <span id="task-count">0</span></div>
+            </div>
+            
+            <div class="upload-section">
+                <h3>📹 Upload Video</h3>
+                <div class="upload-area" onclick="document.getElementById('video-input').click()">
+                    <div class="upload-icon">📹</div>
+                    <div class="upload-text">Click or drag video file</div>
+                    <input type="file" id="video-input" accept="video/*">
+                    <div id="video-info" class="file-info" style="display: none;"></div>
+                </div>
+            </div>
+            
+            <div class="upload-section">
+                <h3>🎵 Upload Audio</h3>
+                <div class="upload-area" onclick="document.getElementById('audio-input').click()">
+                    <div class="upload-icon">🎵</div>
+                    <div class="upload-text">Click or drag audio file</div>
+                    <input type="file" id="audio-input" accept="audio/*">
+                    <div id="audio-info" class="file-info" style="display: none;"></div>
+                </div>
+            </div>
+            
+            <div class="controls">
+                <div class="control-group">
+                    <label>💋 Lips Expression</label>
+                    <input type="range" id="lips-expression" min="0.1" max="3.0" step="0.1" value="1.5">
+                    <span id="lips-value">1.5</span>
+                </div>
+                <div class="control-group">
+                    <label>🎲 Seed</label>
+                    <input type="number" id="seed" value="1331">
+                </div>
+            </div>
+            
+            <button class="btn" id="generate-btn" onclick="generateLipSync()" disabled>
+                🚀 Generate LipSync
+            </button>
+            
+            <div class="servers-section">
+                <h3>🖥️ GPU Servers Status</h3>
+                <div id="server-grid" class="server-grid">
+                    <!-- Populated by JS -->
+                </div>
+            </div>
+        </div>
+        
+        <div class="panel">
+            <div class="tasks-section">
+                <h3>📋 Tasks & Results</h3>
+                <div id="tasks-container">
+                    <div style="text-align: center; opacity: 0.7; padding: 40px;">
+                        No tasks yet. Upload files and generate!
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const API_URL = 'http://89.208.11.177:8000';
+        let uploadedFiles = {video: null, audio: null};
+        let tasks = {};
+        let progressTimers = {};
+        let sessionStartTime = Date.now(); // Отслеживаем начало сессии
+        
+        // Update lips expression display
+        document.getElementById('lips-expression').oninput = function() {
+            document.getElementById('lips-value').textContent = this.value;
+        };
+        
+        // File upload handlers
+        document.getElementById('video-input').addEventListener('change', function(e) {
+            handleFileUpload(e.target.files[0], 'video');
+        });
+        
+        document.getElementById('audio-input').addEventListener('change', function(e) {
+            handleFileUpload(e.target.files[0], 'audio');
+        });
+        
+        async function handleFileUpload(file, type) {
+            if (!file) return;
+            
+            const formData = new FormData();
+            formData.append('file', file);
+            
+            const infoDiv = document.getElementById(`${type}-info`);
+            infoDiv.style.display = 'block';
+            infoDiv.innerHTML = `📤 Uploading ${file.name}...`;
+            
+            try {
+                const response = await fetch(`${API_URL}/upload`, {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    uploadedFiles[type] = result.filename;
+                    
+                    infoDiv.innerHTML = `✅ ${file.name} (${Math.round(result.size/1024)}KB)`;
+                    
+                    // Get duration
+                    if (type === 'video' || type === 'audio') {
+                        getMediaDuration(file, type);
+                    }
+                    
+                    checkGenerateButton();
+                } else {
+                    infoDiv.innerHTML = `❌ Upload failed`;
+                }
+            } catch (error) {
+                infoDiv.innerHTML = `❌ Upload error`;
+            }
+        }
+        
+        function getMediaDuration(file, type) {
+            const mediaElement = type === 'video' ? document.createElement('video') : document.createElement('audio');
+            const url = URL.createObjectURL(file);
+            
+            mediaElement.onloadedmetadata = function() {
+                const duration = Math.round(mediaElement.duration);
+                uploadedFiles[`${type}_duration`] = duration;
+                
+                const infoDiv = document.getElementById(`${type}-info`);
+                infoDiv.innerHTML += `<br>⏱️ Duration: ${duration}s`;
+                URL.revokeObjectURL(url);
+            };
+            
+            mediaElement.src = url;
+        }
+        
+        function checkGenerateButton() {
+            const btn = document.getElementById('generate-btn');
+            btn.disabled = !uploadedFiles.video || !uploadedFiles.audio;
+        }
+        
+        async function generateLipSync() {
+            const payload = {
+                video_file: uploadedFiles.video,
+                audio_file: uploadedFiles.audio,
+                lips_expression: parseFloat(document.getElementById('lips-expression').value),
+                seed: parseInt(document.getElementById('seed').value) || 1331,
+                // trim_to_audio: always enabled
+                save_output: true
+            };
+            
+            try {
+                const response = await fetch(`${API_URL}/generate`, {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify(payload)
+                });
+                
+                if (response.ok) {
+                    const result = await response.json();
+                    startTaskMonitoring(result.task_id);
+                }
+            } catch (error) {
+                console.error('Generate error:', error);
+            }
+        }
+        
+        function startTaskMonitoring(taskId) {
+            const pollTask = async () => {
+                try {
+                    const response = await fetch(`${API_URL}/task/${taskId}`);
+                    if (response.ok) {
+                        const task = await response.json();
+                        updateTask(task);
+                        
+                        if (task.status === 'processing' || task.status === 'started' || task.status === 'queued') {
+                            setTimeout(pollTask, 2000);
+                        }
+                    }
+                } catch (error) {
+                    console.error('Task polling error:', error);
+                }
+            };
+            
+            pollTask();
+        }
+        
+        function updateTask(task) {
+            // Add estimated total time based on video duration
+            if (!task.estimated_total_time && (uploadedFiles.video_duration || uploadedFiles.audio_duration)) {
+                const videoDuration = uploadedFiles.video_duration || uploadedFiles.audio_duration || 10;
+                task.estimated_total_time = Math.max(videoDuration * 18, 30);
+            }
+            tasks[task.task_id] = task;
+            renderTasks();
+            
+            if (task.status === 'processing' || task.status === 'started' || task.status === 'queued') {
+                startProgressAnimation(task);
+            } else {
+                stopProgressAnimation(task.task_id);
+            }
+        }
+        
+        function startProgressAnimation(task) {
+            if (progressTimers[task.task_id]) return;
+            
+            // Calculate estimated time: video duration * 18
+            const videoDuration = uploadedFiles.video_duration || uploadedFiles.audio_duration || 10;
+            const estimatedSeconds = Math.max(videoDuration * 18, 30);
+            
+            let startTime = Date.now();
+            let currentProgress = 0; // Начинаем с 0, а не с task.progress
+            
+            progressTimers[task.task_id] = setInterval(() => {
+                const elapsed = (Date.now() - startTime) / 1000;
+                const calculatedProgress = Math.min((elapsed / estimatedSeconds) * 100, 95);
+                
+                // Используем только рассчитанный прогресс, игнорируем backend progress
+                currentProgress = calculatedProgress;
+                
+                task.progress = currentProgress;
+                task.estimated_time_left = Math.max(0, estimatedSeconds - elapsed);
+                
+                renderTasks();
+                
+                if (task.status === 'completed' || task.status === 'failed') {
+                    task.progress = 100; // Завершенные задачи - 100%
+                    stopProgressAnimation(task.task_id);
+                }
+            }, 1000);
+        }
+        
+        function stopProgressAnimation(taskId) {
+            if (progressTimers[taskId]) {
+                clearInterval(progressTimers[taskId]);
+                delete progressTimers[taskId];
+            }
+        }
+        
+        function renderTasks() {
+            const container = document.getElementById('tasks-container');
+            const taskList = Object.values(tasks).sort((a, b) => new Date(b.started_at || 0) - new Date(a.started_at || 0));
+            
+            if (taskList.length === 0) {
+                container.innerHTML = `<div style="text-align: center; opacity: 0.7; padding: 40px;">No tasks yet. Upload files and generate!</div>`;
+                return;
+            }
+            
+            container.innerHTML = taskList.map(task => {
+                const progressClass = (task.status === 'processing' || task.status === 'started') ? 'animated' : '';
+                // Time display - show both remaining and total estimated
+                const timeInfo = task.estimated_total_time ? 
+                    `<div class="estimated-time">⏱️ Estimated: ~${Math.round(task.estimated_total_time/60)}m ${Math.round(task.estimated_total_time%60)}s total</div>` : "";
+                const remainingTime = task.estimated_time_left ? 
+                    `<div class="estimated-time">⏳ ${Math.round(task.estimated_time_left)}s remaining</div>` : "";
+                
+                return `
+                    <div class="task-card">
+                        <div class="task-header">
+                            <span>Task: ${task.task_id.substring(0, 8)}...</span>
+                            <span class="task-status ${task.status}">${task.status.toUpperCase()}</span>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill ${progressClass}" style="width: ${task.progress || 0}%"></div>
+                        </div>
+                        <div>${task.message || 'Processing...'}</div>
+                        ${timeInfo}${remainingTime}
+                        ${task.result_url ? `<a href="${task.result_url}" style="color: #FF9800; text-decoration: none;">📥 Download Result</a>` : ''}
+                    </div>
+                `;
+            }).join('');
+            
+            document.getElementById('task-count').textContent = Object.keys(tasks).length;
+        }
+
+        async function loadServerStatus() {
+            try {
+                const response = await fetch(`${API_URL}/servers/status`);
+                if (response.ok) {
+                    const data = await response.json();
+                    updateServerDisplay(data.servers);
+                    
+                    const onlineCount = data.servers.filter(s => s.status === 'online').length;
+                    document.getElementById('server-count').textContent = `${onlineCount}/${data.servers.length}`;
+                    document.getElementById('api-status').textContent = 'Connected';
+                    document.getElementById('api-dot').className = 'status-dot';
+                } else {
+                    document.getElementById('api-status').textContent = 'Error';
+                    document.getElementById('api-dot').className = 'status-dot offline';
+                }
+            } catch (error) {
+                document.getElementById('api-status').textContent = 'Disconnected';
+                document.getElementById('api-dot').className = 'status-dot offline';
+            }
+        }
+
+        function updateServerDisplay(servers) {
+            const grid = document.getElementById('server-grid');
+            grid.innerHTML = servers.map(server => {
+                const statusClass = server.queue_size > 0 ? 'busy' : server.status;
+                const progressPercent = server.queue_size > 0 ? (server.queue_size / server.max_load) * 100 : 0;
+                const memoryGB = Math.round(server.memory_used / (1024 * 1024 * 1024));
+                const memoryTotalGB = Math.round(server.memory_total / (1024 * 1024 * 1024));
+                
+                return `
+                    <div class="server-card ${statusClass}">
+                        <div class="server-header">
+                            <div class="server-name">GPU ${server.gpu_id}</div>
+                            <div class="server-status">
+                                <span class="status-dot ${statusClass}"></span>
+                                ${server.status.toUpperCase()}
+                            </div>
+                        </div>
+                        <div class="server-stats">
+                            <div>🔗 :${server.url.split(':')[1]}</div>
+                            <div>📊 Queue: ${server.queue_size}/${server.max_load}</div>
+                            <div>💾 ${memoryGB}GB/${memoryTotalGB}GB</div>
+                        </div>
+                        <div class="server-progress">
+                            <div class="server-progress-fill ${statusClass}" style="width: ${Math.min(progressPercent, 100)}%"></div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // НЕ загружаем все задачи автоматически - показываем только те, что создаем в этой сессии
+        // async function loadAllTasks() - убрана
+
+        setInterval(loadServerStatus, 3000);
+        
+        loadServerStatus();
+    </script>
+</body>
+</html>

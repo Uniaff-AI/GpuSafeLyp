@@ -1,0 +1,46 @@
+# Logs
+*.log
+backend.log
+frontend.log
+comfy_*.log
+comfyui_*.log
+gpu*.log
+*.SCREEN.log
+
+# Backup files
+*.backup
+*.bak
+*.backup_*
+*_backup_*
+*.old
+*_old*
+*BEFORE*
+*before*
+*FIXED*
+*MANUAL*
+
+# Python cache
+__pycache__/
+*.pyc
+*.pyo
+
+# Temporary files
+current_tasks.json
+uploads/
+*.tmp
+*.temp
+
+# Environment specific
+.env
+.venv
+
+# System files
+.DS_Store
+Thumbs.db
+
+# Don't ignore our main working files
+!backend_with_timing.py
+!index.html
+!start_all.sh
+!stop_all.sh
+!media_utils.py

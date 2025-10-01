@@ -1,0 +1,62 @@
+# LipSync Production System - Current Configuration
+# Generated: Wed Oct  1 00:06:49 UTC 2025
+# Status: ✅ PRODUCTION READY
+
+## Hardware Configuration
+GPU 0, NVIDIA GeForce RTX 3090, 24576
+GPU 1, NVIDIA GeForce RTX 3090, 24576
+GPU 2, NVIDIA GeForce RTX 3090, 24576
+GPU 3, NVIDIA GeForce RTX 3090, 24576
+GPU 4, NVIDIA GeForce RTX 3090, 24576
+GPU 5, NVIDIA GeForce RTX 3090, 24576
+GPU 6, NVIDIA GeForce RTX 3090, 24576
+GPU 7, NVIDIA GeForce RTX 3090, 24576
+
+## Active Processes
+Backend PID: 1989012
+Frontend PID: 1941032
+
+ComfyUI Servers:
+Port --listen: PID 1995626
+Port --listen: PID 1995698
+Port --listen: PID 1995839
+Port --listen: PID 1995978
+Port --listen: PID 1996120
+Port --listen: PID 1996259
+Port --listen: PID 1996398
+Port --listen: PID 1996539
+
+## Network Configuration
+Frontend URL: http://89.208.11.177:3001/
+Backend API: http://89.208.11.177:8000/
+ComfyUI Endpoints: http://89.208.11.177:8188-8195/
+
+## Current System Status
+Server localhost:8188: online (GPU 0, 1.6% memory)
+Server localhost:8189: online (GPU 1, 1.6% memory)
+Server localhost:8190: online (GPU 2, 1.6% memory)
+Server localhost:8191: online (GPU 3, 1.2% memory)
+Server localhost:8192: online (GPU 4, 1.2% memory)
+Server localhost:8193: online (GPU 5, 1.2% memory)
+Server localhost:8194: online (GPU 6, 1.2% memory)
+Server localhost:8195: online (GPU 7, 1.2% memory)
+
+## File Locations
+Backend Code: /home/epycmax/lipsync_production_WORKING_20251001_000453/backend_with_timing.py
+Frontend Code: /home/epycmax/lipsync_production_WORKING_20251001_000453/index.html
+ComfyUI Installation: /home/epycmax/ComfyUI-Production/
+Conda Environment: latentsync
+
+## Key Settings
+- GPU Distribution: CUDA_VISIBLE_DEVICES (each server sees only its GPU)
+- Progress Formula: 10% + (elapsed/420) * 80% (7-minute estimation)
+- File Paths: Absolute paths to /home/epycmax/ComfyUI-Production/
+- Load Balancer: Smart selection based on queue size and VRAM usage
+- Fallback File Search: Time-based filtering (files newer than task start)
+
+## Performance Metrics
+- Concurrent Tasks: Up to 8 (one per GPU)
+- Processing Time: ~7 minutes for 30-second video
+- Throughput: ~68 tasks per hour (theoretical maximum)
+- Memory per Active Task: ~17GB VRAM
+- Memory per Idle Server: ~280MB VRAM
